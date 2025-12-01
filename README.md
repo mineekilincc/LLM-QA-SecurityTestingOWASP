@@ -45,7 +45,7 @@ Yerelde çalışan OWASP Juice Shop (varsayılan: http://localhost:3000)
 Global veya lokal Cypress kurulumu
 
 Juice Shop için kurulum dokümantasyonu:
-👉 https://github.com/juice-shop/juice-shop
+https://github.com/juice-shop/juice-shop
 
 
 **3. Kurulum Adımları (Adım Adım)**
@@ -65,7 +65,8 @@ Terminalde şu mesaja benzer bir şey görmelisin:
 Server listening on port 3000
 
 
-4.2. Bu Repoyu Klonla
+
+3.2. Bu Repoyu Klonla
 
 Ayrı bir klasörde bu LLM-QA test reposunu çek:
 
@@ -79,9 +80,10 @@ npm init -y
 npm install cypress --save-dev
 
 
-4.3. Cypress’i Aç
-npx cypress open
 
+3.3. Cypress’i Aç
+
+npx cypress open
 
 Cypress açıldığında:
 
@@ -92,7 +94,7 @@ Bir tarayıcı (Chrome vs.) seç
 Spec listesinde xss-juice-shop.cy.js test dosyasını görmelisin.
 
 
-5. Testin Çalışma Mantığı
+4. Testin Çalışma Mantığı
 
 Test kodu (özet):
 
@@ -103,7 +105,7 @@ describe('XSS Test – OWASP Juice Shop (Variable Injection)', () => {
     const payload = `<iframe src="javascript:window.parent.hacked=true"></iframe>`;
 
     cy.visit(`http://localhost:3000/#/search?q=${encodeURIComponent(payload)}`);
-
+  
     cy.window().should('have.property', 'hacked', true);
   });
 });
