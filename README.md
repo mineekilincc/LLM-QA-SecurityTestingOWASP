@@ -3,101 +3,87 @@
 Bu repo, **LLM-QA** projesi kapsamında OWASP Juice Shop üzerinde yapılan **XSS güvenlik testi deneyi** için hazırlanmış minimal bir Cypress projesidir.
 
 Amaç:
-- GitHub’daki bir yazılım projesi (OWASP Juice Shop) üzerinde
-- LLM tabanlı kalite analiz yaklaşımına uygun olarak
+
+- GitHub’daki bir yazılım projesi (OWASP Juice Shop) üzerinde  
+- LLM tabanlı kalite analiz yaklaşımına uygun olarak  
 - Gerçek bir güvenlik açığını (Reflected XSS) **otomatik bir test ile kanıtlamak**  
-ve bu sürecin adımlarını belgelendirmektir.
+- Bu sürecin adımlarını belgelendirmek
 
 ---
 
-**1. Ne Test Ediliyor?**
+## 1. Ne Test Ediliyor?
 
-Hedef uygulama: **OWASP Juice Shop**
+**Hedef uygulama:** OWASP Juice Shop  
+**Hedef hata:** Search özelliğinde (`/search?q=`) bulunan **Reflected XSS (Yansıtılmış XSS)** açığı
 
-Hedef hata:  
-- Arama özelliğinde (`/search?q=`) bulunan **Reflected XSS (Yansıtılmış XSS)** açığı  
-- Kullanıcıdan gelen `q` parametresi, yeterli filtreleme yapılmadan DOM içinde çalıştırılabiliyor.
+Kullanıcıdan gelen `q` parametresi yeterli filtreleme yapılmadan DOM içinde çalıştırılıyor.
 
-Klasik `alert('XSS')` yaklaşımı yerine, daha stabil bir yöntem kullanıldı:
+Klasik `alert('XSS')` yerine daha stabil bir payload kullanıldı:
 
-```
-html
+```html
 <iframe src="javascript:window.parent.hacked=true"></iframe>
-Bu payload çalıştığında, tarayıcıdaki window objesinde:
+Bu payload çalıştığında tarayıcıdaki window objesinde şu değer oluşur:
 
-```
 js
 Kodu kopyala
-**window.hacked === true**
-oluyor ve Cypress testi de tam olarak bunu doğruluyor.
+window.hacked === true
+Cypress de tam olarak bunu doğrular.
 
-
-**2.Gereksinimler**
-
+2. Gereksinimler
 Bu testin çalışması için:
 
 Node.js (20.x önerilir)
 
 npm
 
-Yerelde çalışan OWASP Juice Shop (varsayılan: http://localhost:3000)
+Yerelde çalışan OWASP Juice Shop → http://localhost:3000
 
-Global veya lokal Cypress kurulumu
+Lokal veya global Cypress
 
-Juice Shop için kurulum dokümantasyonu:
+Juice Shop kurulum dokümantasyonu:
 https://github.com/juice-shop/juice-shop
 
-
-**3. Kurulum Adımları (Adım Adım)**
-
+3. Kurulum Adımları (Step-by-step)
 3.1. Juice Shop’u Çalıştır
-
-Önce Juice Shop reposunu ayrı bir klasörde çalıştırmalısın:
-
+bash
+Kodu kopyala
 git clone https://github.com/juice-shop/juice-shop.git
 cd juice-shop
 npm install
 npm start
+Terminalde şu yazıyı görmelisin:
 
-
-Terminalde şu mesaja benzer bir şey görmelisin:
-
+nginx
+Kodu kopyala
 Server listening on port 3000
-
-
-
 3.2. Bu Repoyu Klonla
-
-Ayrı bir klasörde bu LLM-QA test reposunu çek:
-
+bash
+Kodu kopyala
 git clone https://github.com/mineekilincc/LLM-QA-SecurityTestingOWASP.git
 cd LLM-QA-SecurityTestingOWASP
+Ardından Cypress kur:
 
-
-Ardından minimal bir package.json oluşturup Cypress kur:
-
+bash
+Kodu kopyala
 npm init -y
 npm install cypress --save-dev
-
-
-
 3.3. Cypress’i Aç
-
+bash
+Kodu kopyala
 npx cypress open
-
 Cypress açıldığında:
 
 E2E Testing seç
 
-Bir tarayıcı (Chrome vs.) seç
+Tarayıcı seç (Chrome / Electron)
 
-Spec listesinde xss-juice-shop.cy.js test dosyasını görmelisin.
-
+Listede xss-juice-shop.cy.js görünmeli
 
 4. Testin Çalışma Mantığı
+Aşağıdaki test, XSS açığını varlık kanıtı (proof) olarak doğrular:
 
-Test kodu (özet):
-
+js
+Kodu kopyala
 /// <reference types="cypress" />
 
 describe('XSS Test – OWASP Juice Shop (Variable Injection)', () => {
@@ -105,18 +91,15 @@ describe('XSS Test – OWASP Juice Shop (Variable Injection)', () => {
     const payload = `<iframe src="javascript:window.parent.hacked=true"></iframe>`;
 
     cy.visit(`http://localhost:3000/#/search?q=${encodeURIComponent(payload)}`);
-  
+
     cy.window().should('have.property', 'hacked', true);
   });
 });
+Test Adımları:
+Juice Shop’un search sayfasına q parametresiyle XSS payload gönderilir.
 
+Payload, window.parent.hacked = true değerini yazar.
 
-Adımlar:
+Cypress cy.window() ile tarayıcı penceresini alıp değişkeni kontrol eder.
 
-Juice Shop ana sayfasının arama sayfasına, q parametresiyle bir XSS payload gönderiliyor.
-
-Bu payload, window.parent.hacked = true şeklinde global bir değişken yazıyor.
-
-Cypress, cy.window() ile tarayıcı penceresini alıyor ve hacked isminde bir property olup olmadığını kontrol ediyor.
-
-Eğer test PASS ise → XSS payload’ı gerçekten çalışmış, yani açık var demektir.
+Eğer test PASS olursa → XSS açığı çalışmıştır → güvenlik zafiyeti kanıtlanmıştır.
