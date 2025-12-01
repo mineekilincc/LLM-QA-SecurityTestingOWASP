@@ -118,4 +118,4 @@ Bu payload, window.parent.hacked = true şeklinde global bir değişken yazıyor
 
 Cypress, cy.window() ile tarayıcı penceresini alıyor ve hacked isminde bir property olup olmadığını kontrol ediyor.
 
-Eğer test PASS ise → XSS payload’ı gerçekten çalışmış, yani açık var demektir. BURAYI METİN DİZİLİMİ OLARAK GİTHUB README KISMINA UYGUN OLARAK SYANTACKSLER MİSİN
+Eğer test PASS ise → XSS payload’ı gerçekten çalışmış, yani açık var demektir.
